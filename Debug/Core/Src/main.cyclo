@@ -16,27 +16,27 @@ C:\ST\STM32CubeIDE_1.13.2\STM32CubeIDE\plugins\com.st.stm32cube.ide.mcu.external
 ../Core/Src/main.cpp:286:6:void respondframe(std::string)	1
 ../Core/Src/main.cpp:299:6:void resettimevals()	1
 ../Core/Src/main.cpp:311:6:void processcmd(char, const string&)	14
-../Core/Src/main.cpp:405:6:bool decodePAWNET(const string&)	7
-../Core/Src/main.cpp:459:6:void ADC_DMA_updateAverages()	5
-../Core/Src/main.cpp:480:5:int compareUint16(const void*, const void*)	1
-../Core/Src/main.cpp:483:5:int extractAndSortChannel(uint16_t*, int)	3
-../Core/Src/main.cpp:500:5:int calculateMean(uint16_t*, int)	2
-../Core/Src/main.cpp:506:6:void ADC_DMA_updateMeans()	1
-../Core/Src/main.cpp:517:6:void normaliseADCOut()	1
-../Core/Src/main.cpp:521:6:void ADC_DMA_UPDATE()	4
-../Core/Src/main.cpp:532:6:void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef*)	2
-../Core/Src/main.cpp:536:6:void HAL_ADC_ConvHalfCpltCallback(ADC_HandleTypeDef*)	3
-../Core/Src/main.cpp:544:6:void HAL_GPIO_EXTI_Callback(uint16_t)	5
-../Core/Src/main.cpp:574:6:void hardcloseallvalves()	1
-../Core/Src/main.cpp:582:6:void switchfiringstate()	6
-../Core/Src/main.cpp:620:6:void firingswitch()	3
-../Core/Src/main.cpp:643:5:int main()	11
-../Core/Src/main.cpp:744:6:void SystemClock_Config()	3
-../Core/Src/main.cpp:791:13:void MX_ADC1_Init()	4
-../Core/Src/main.cpp:852:13:void MX_USART2_UART_Init()	2
-../Core/Src/main.cpp:883:13:void MX_DMA_Init()	1
-../Core/Src/main.cpp:901:13:void MX_GPIO_Init()	1
-../Core/Src/main.cpp:974:6:void Error_Handler()	1
+../Core/Src/main.cpp:398:6:bool decodePAWNET(const string&)	7
+../Core/Src/main.cpp:452:6:void ADC_DMA_updateAverages()	5
+../Core/Src/main.cpp:473:5:int compareUint16(const void*, const void*)	1
+../Core/Src/main.cpp:476:5:int extractAndSortChannel(uint16_t*, int)	3
+../Core/Src/main.cpp:493:5:int calculateMean(uint16_t*, int)	2
+../Core/Src/main.cpp:499:6:void ADC_DMA_updateMeans()	1
+../Core/Src/main.cpp:510:6:void normaliseADCOut()	1
+../Core/Src/main.cpp:514:6:void ADC_DMA_UPDATE()	4
+../Core/Src/main.cpp:525:6:void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef*)	1
+../Core/Src/main.cpp:530:6:void HAL_ADC_ConvHalfCpltCallback(ADC_HandleTypeDef*)	3
+../Core/Src/main.cpp:538:6:void HAL_GPIO_EXTI_Callback(uint16_t)	5
+../Core/Src/main.cpp:568:6:void hardcloseallvalves()	1
+../Core/Src/main.cpp:576:6:void switchfiringstate()	6
+../Core/Src/main.cpp:613:6:void firingswitch()	3
+../Core/Src/main.cpp:636:5:int main()	11
+../Core/Src/main.cpp:737:6:void SystemClock_Config()	3
+../Core/Src/main.cpp:784:13:void MX_ADC1_Init()	4
+../Core/Src/main.cpp:845:13:void MX_USART2_UART_Init()	2
+../Core/Src/main.cpp:876:13:void MX_DMA_Init()	1
+../Core/Src/main.cpp:894:13:void MX_GPIO_Init()	1
+../Core/Src/main.cpp:967:6:void Error_Handler()	1
 C:\ST\STM32CubeIDE_1.13.2\STM32CubeIDE\plugins\com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.11.3.rel1.win32_1.1.100.202309141235\tools\arm-none-eabi\include\c++\11.3.1\ext\string_conversions.h:63:2:)::_Save_errno::_Save_errno() [with _TRet = long int; _Ret = int; _CharT = char; _Base = {int}]	1
 C:\ST\STM32CubeIDE_1.13.2\STM32CubeIDE\plugins\com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.11.3.rel1.win32_1.1.100.202309141235\tools\arm-none-eabi\include\c++\11.3.1\ext\string_conversions.h:64:2:)::_Save_errno::~_Save_errno() [with _TRet = long int; _Ret = int; _CharT = char; _Base = {int}]	2
 C:\ST\STM32CubeIDE_1.13.2\STM32CubeIDE\plugins\com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.11.3.rel1.win32_1.1.100.202309141235\tools\arm-none-eabi\include\c++\11.3.1\ext\string_conversions.h:73:4:)::_Range_chk::_S_chk(_TRet, std::true_type) [with _TRet = long int; _Ret = int; _CharT = char; _Base = {int}]	1
@@ -72,6 +72,6 @@ C:\ST\STM32CubeIDE_1.13.2\STM32CubeIDE\plugins\com.st.stm32cube.ide.mcu.external
 C:\ST\STM32CubeIDE_1.13.2\STM32CubeIDE\plugins\com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.11.3.rel1.win32_1.1.100.202309141235\tools\bin/../lib/gcc/arm-none-eabi/11.3.1/../../../../arm-none-eabi/include/c++/11.3.1/bits/move.h:104:5:constexpr typename std::remove_reference<_Tp>::type&& std::move(_Tp&&) [with _Tp = std::__cxx11::basic_string<char>&]	1
 C:\ST\STM32CubeIDE_1.13.2\STM32CubeIDE\plugins\com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.11.3.rel1.win32_1.1.100.202309141235\tools\bin/../lib/gcc/arm-none-eabi/11.3.1/../../../../arm-none-eabi/include/c++/11.3.1/bits/allocator.h:204:7:bool std::operator==(const std::allocator<char>&, const std::allocator<char>&)	1
 C:\ST\STM32CubeIDE_1.13.2\STM32CubeIDE\plugins\com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.11.3.rel1.win32_1.1.100.202309141235\tools\arm-none-eabi\include\c++\11.3.1\bits\alloc_traits.h:562:7:static std::allocator_traits<std::allocator<_CharT> >::allocator_type std::allocator_traits<std::allocator<_CharT> >::select_on_container_copy_construction(const allocator_type&) [with _Tp = char]	1
-../Core/Src/main.cpp:983:1:void __static_initialization_and_destruction_0(int, int)	5
-../Core/Src/main.cpp:983:1:cpp)	1
-../Core/Src/main.cpp:983:1:cpp)	1
+../Core/Src/main.cpp:976:1:void __static_initialization_and_destruction_0(int, int)	5
+../Core/Src/main.cpp:976:1:cpp)	1
+../Core/Src/main.cpp:976:1:cpp)	1

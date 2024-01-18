@@ -68,7 +68,7 @@ float channel2mean();
 #define ADC_DMABUFFERSIZE 512
 //definicje wartości zmiennych systemu gazowego
 #define DELTIME 121
-#define MULTIPL 1.5
+#define MULTIPL 3
 #define BEWTIME 120
 #define GVOTIME 140
 #define SPTTIME 150
@@ -161,13 +161,6 @@ public:
       return maxSize;
     }
 };
-void replaceAll(std::string& str, const std::string& from, const std::string& to) {
-    size_t start_pos = 0;
-    while ((start_pos = str.find(from, start_pos)) != std::string::npos) {
-        str.replace(start_pos, from.length(), to);
-        start_pos += to.length();
-    }
-}
 uint8_t itemRx;
 CircularBuffer<4096> rx;
 uint8_t itemTx;
@@ -196,9 +189,17 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart) {
 	//if(itemRx=='|')endcharcounter++;
 	HAL_UART_Receive_IT(&huart2, &itemRx, 1);
 }
+
 //----------------------------//
 //POWYŻEJ UART, PONIŻEJ RAMKA
 //----------------------------//
+void replaceAll(std::string& str, const std::string& from, const std::string& to) {
+    size_t start_pos = 0;
+    while ((start_pos = str.find(from, start_pos)) != std::string::npos) {
+        str.replace(start_pos, from.length(), to);
+        start_pos += to.length();
+    }
+}
 void trimStartEndCharacters(std::string& str, char startChar, char endChar) {
 
     // przycinanie do pierwszej instancji znaku
@@ -319,7 +320,7 @@ void processcmd(char cmd,const std::string& data){
 
 	case 'e':
 		//echo
-		USART_send("ECH:"+data+"\r\n");
+		respondframe("ECH:"+data);
 	break;
 
 	case 'd':
@@ -370,24 +371,23 @@ void processcmd(char cmd,const std::string& data){
 		//DMAbufferavearage
 		snprintf(str1,10,"%f",c1avg);
 		snprintf(str2,10,"%f",c2avg);
-		respondframe((std::string)str1+":"+(std::string)str2);
+		respondframe("AVG:"+(std::string)str1+":"+(std::string)str2);
 
 	break;
 	case 'i':
 		//DMAbuffermean
-
 		snprintf(str1,10,"%f",c1med);
 		snprintf(str2,10,"%f",c2med);
-		respondframe((std::string)str1+":"+(std::string)str2);
+		respondframe("MED:"+(std::string)str1+":"+(std::string)str2);
 
 	break;
 	case 'p':
 		//Button Press counter
-		respondframe(std::to_string(ButtonPresses));
+		respondframe("PSS:"+std::to_string(ButtonPresses));
 		break;
 	case 'f':
 		FBpressed=1;
-		respondframe("Firing.");
+		respondframe("FIRE!");
 		break;
 	default:
 		respondframe("CMDERR");
@@ -447,20 +447,19 @@ bool decodePAWNET(const std::string& message) {
 //--------//
 float POTBufferMin,POTBufferMax,POTBufNormAvg;
 uint16_t chn1=0,chn2=0,ADC_DMA_Buffer[ADC_DMABUFFERSIZE*2]={0};
-uint8_t convcompl=0;
-//TODO: Upewnij się że bufor jest wypełniany w ten sposób, NIE JEST! Do naprawy.
-
+bool convcompl=false;
 void ADC_DMA_updateAverages() {
 	uint16_t valid_entries=0;
 	float tmpc1avg,tmpc2avg;
     for (int i = 0; i < ADC_DMABUFFERSIZE-1 * 2; i += 2) {
-        if (ADC_DMA_Buffer[i] == 0 || ADC_DMA_Buffer[i + 1] == 0) {
+    	if (ADC_DMA_Buffer[i] == 0 || ADC_DMA_Buffer[i + 1] == 0) {
             break;//zakończ jeżeli którykolwiek z kanałów ma 0
         }
 
         tmpc1avg += ADC_DMA_Buffer[i]; //dodawanie do średniej.
         tmpc2avg += ADC_DMA_Buffer[i + 1];
         valid_entries++;
+
     }
 
     // nie dziel przez zero lol
@@ -512,11 +511,12 @@ void normaliseADCOut(){
 	POTBufNormAvg=(c1avg-POTBufferMin)/(POTBufferMax-POTBufferMin);
 }
 bool ReadyToUpdateAvg=false;
-void ADC_DMA_UPDATE(){//TODO: figure this out
+void ADC_DMA_UPDATE(){
 	ADC_DMA_updateAverages();
 	if(convcompl){
 		if(c1avg<POTBufferMin)POTBufferMin=c1avg;
 		if(c1avg>POTBufferMax)POTBufferMax=c1avg;
+		if(POTBufferMax>4100)POTBufferMax=c1avg;
 		normaliseADCOut();
 		ADC_DMA_updateMeans();
 	}
@@ -524,13 +524,14 @@ void ADC_DMA_UPDATE(){//TODO: figure this out
 }
 
 void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef* hadc){
-	if(!convcompl)convcompl=1;//doszło do konwersji na całej długości bufora
 	ReadyToUpdateAvg=true;
+
+	convcompl=true;//doszło do konwersji na całej długości bufora
 }
 void HAL_ADC_ConvHalfCpltCallback(ADC_HandleTypeDef* hadc){
+	ReadyToUpdateAvg=true;
 	if(!convcompl)POTBufferMin=ADC_DMA_Buffer[0];//inicjalizacja min max
 	if(!convcompl)POTBufferMax=ADC_DMA_Buffer[0];
-	ReadyToUpdateAvg=true;
 }
 
 float firingcounter=1;
@@ -601,7 +602,6 @@ void switchfiringstate(){
 					FBpressed=0;
 					HAL_NVIC_EnableIRQ(EXTI9_5_IRQn);
 				}
-
 				firingstate=GasValvesOpen;
 				break;
 			default:
@@ -777,6 +777,7 @@ void SystemClock_Config(void)
     Error_Handler();
   }
 }
+
 /**
   * @brief ADC1 Initialization Function
   * @param None
@@ -935,7 +936,7 @@ static void MX_GPIO_Init(void)
 
   /*Configure GPIO pin : FB_Pin */
   GPIO_InitStruct.Pin = FB_Pin;
-  GPIO_InitStruct.Mode = GPIO_MODE_IT_RISING_FALLING;
+  GPIO_InitStruct.Mode = GPIO_MODE_IT_RISING;
   GPIO_InitStruct.Pull = GPIO_PULLDOWN;
   HAL_GPIO_Init(FB_GPIO_Port, &GPIO_InitStruct);
 
