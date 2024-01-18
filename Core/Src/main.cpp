@@ -64,14 +64,15 @@ float channel2mean();
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
+//TODO:początek kodu
 //rozmiar bufora ADC
 #define ADC_DMABUFFERSIZE 512
 //definicje wartości zmiennych systemu gazowego
-#define DELTIME 121
-#define MULTIPL 3
-#define BEWTIME 120
-#define GVOTIME 140
-#define SPTTIME 150
+#define DELTIME 100
+#define MULTIPL 5
+#define BEWTIME 80
+#define GVOTIME 50
+#define SPTTIME 50
 #include <string>
 #include <algorithm>
 enum Written {
@@ -170,7 +171,7 @@ void USART_send(std::string a) {
 	if(tx.size()+a.length()>tx.capacity())return;
   for(uint8_t charr:a)tx.push(charr);//dodaj do bufora znaki ze stringa
   __disable_irq();//zatrzymaj przerwania w celu nieprzerwanej transmisji
-  if ((__HAL_UART_GET_FLAG(&huart2, UART_FLAG_TXE) != RESET)) {//sprawdzanie czy linia jest obecnie wykorzystywana
+  if (__HAL_UART_GET_FLAG(&huart2, UART_FLAG_TXE) != RESET) {//sprawdzanie czy linia jest obecnie wykorzystywana
     itemTx= tx.pop();//zczytaj znak na końcu
     HAL_UART_Transmit_IT(&huart2, &itemTx, 1);//prześlij pierwszy znak z
   }
@@ -192,7 +193,7 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart) {
 
 //----------------------------//
 //POWYŻEJ UART, PONIŻEJ RAMKA
-//----------------------------//
+//----------------------------//todo:
 void replaceAll(std::string& str, const std::string& from, const std::string& to) {
     size_t start_pos = 0;
     while ((start_pos = str.find(from, start_pos)) != std::string::npos) {
@@ -214,18 +215,7 @@ void trimStartEndCharacters(std::string& str, char startChar, char endChar) {
         str.erase(endPos + 2);
     }
 }
-/*uint16_t calculatechecksum(char cmd,std::string& data){
-	std::string checkingstr=cmd+data;
-	uint16_t checksum = 0;
-	//dodawanie
-	    for (char c : checkingstr) {
-	        checksum += static_cast<int>(c);
-	    }
-	    USART_send("Calculated checksum of "+checkingstr+" we found out to be "+std::to_string(checksum%1000) +"\r\n");
-	   //zwracanie modula
-	 return checksum % 1000;
 
-}*/
 uint16_t calculateCRC16(const std::string& data) {
     const uint16_t polynomial = 0x8005; //  wielomian
     uint16_t crc = 0xFFFF; // wstepna wartość dla crc
@@ -443,7 +433,7 @@ bool decodePAWNET(const std::string& message) {
     }
 }
 //--------//
-//Powyżej ramka, poniżej DMA//
+//Powyżej ramka, poniżej DMA//TODO:
 //--------//
 float POTBufferMin,POTBufferMax,POTBufNormAvg;
 uint16_t chn1=0,chn2=0,ADC_DMA_Buffer[ADC_DMABUFFERSIZE*2]={0};
@@ -475,17 +465,14 @@ int compareUint16(const void* a, const void* b) {
 }
 int extractAndSortChannel(uint16_t* channel_buffer, int channel_index) {
     int extracted_entries = 0;//zapamiętaj ile jest prawidłowych wartości
-
     for (int i = 0; i < ADC_DMABUFFERSIZE; ++i) {
         channel_buffer[i] = ADC_DMA_Buffer[i * 2 + channel_index];
         if (channel_buffer[i] != 0) {
             extracted_entries++;//zlicz ilość prawidłowych nie zerowych wpisów
         }
     }
-
     // sortowanie
     qsort(channel_buffer, extracted_entries, sizeof(uint16_t), compareUint16);
-
     return extracted_entries;
 }
 
@@ -533,39 +520,7 @@ void HAL_ADC_ConvHalfCpltCallback(ADC_HandleTypeDef* hadc){
 	if(!convcompl)POTBufferMin=ADC_DMA_Buffer[0];//inicjalizacja min max
 	if(!convcompl)POTBufferMax=ADC_DMA_Buffer[0];
 }
-
-float firingcounter=1;
-//uint8_t Firingstate=0;//0-gasvalvesopen/1-waitforgasmix/2-sparkplugignite/3-notfiring
-void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
-{
-	ButtonPresses++;
-	switch(GPIO_Pin){//TODO: EXTI przycisk debounce
-	case FB_Pin://przerwanie wykonane przez przycisk fire
-		if(HAL_GPIO_ReadPin(FB_GPIO_Port, FB_Pin)==GPIO_PIN_SET){
-			//wykryto fire
-			FBpressed=1;
-			firingcounter=1;
-			HAL_NVIC_DisableIRQ(EXTI9_5_IRQn);
-		}else{
-			//wykryto niefire
-			FBpressed=0;
-		}
-		break;
-	case B1_Pin://przerwanie wykonane przez przycisk lock
-		if(HAL_GPIO_ReadPin(B1_GPIO_Port, B1_Pin)==GPIO_PIN_SET){
-				LOCKpressed=1;
-				//USART_send("\r\nDEBUG: LOCKPRESSED\r\n");
-				//hardcloseallvalves();
-				}else{
-
-			}
-		break;
-	default:
-		__NOP();
-		break;
-	}
-
-}
+//TODO:Powyżej DMA ADC, Poniżej GPIO EXTI
 void hardcloseallvalves(){
 	HAL_GPIO_WritePin(GV_GPIO_Port, GV_Pin, GPIO_PIN_RESET);
 	HAL_GPIO_WritePin(OV_GPIO_Port, OV_Pin, GPIO_PIN_RESET);
@@ -573,7 +528,33 @@ void hardcloseallvalves(){
 }
 enum firingstateenum{GasValvesOpen,WaitForGasMix,SparkPlugIgnite,FiringDelay};
 firingstateenum firingstate=GasValvesOpen;
+float firingcounter=1;
+void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
+{
+	ButtonPresses++;//zlicz nacisniecia
+	switch(GPIO_Pin){//co wykonalo przerwanie
+	case FB_Pin://przerwanie wykonane przez przycisk fire
+		if(HAL_GPIO_ReadPin(FB_GPIO_Port, FB_Pin)==GPIO_PIN_SET){
+			//wykryto fire
+			FBpressed=1;
+			firingcounter=1;
+			HAL_NVIC_DisableIRQ(EXTI9_5_IRQn);
+		}
+		break;
+	case B1_Pin://przerwanie wykonane przez przycisk lock
+		if(HAL_GPIO_ReadPin(B1_GPIO_Port, B1_Pin)==GPIO_PIN_SET){
+				hardcloseallvalves();//zamknij wszystko
+				LOCKpressed++;//nacisnięto lock
+				FBpressed=0;//reset FBpressed;
+				firingstate=GasValvesOpen;//reset FS
+				firingcounter=1;//reset FC
+				HAL_NVIC_EnableIRQ(EXTI9_5_IRQn);//ponowne odpalenie przerwań
+				}
+		break;
+	}
+}
 float interval=GVOTIME;
+//todo: Powyżej GPIO EXTI, Poniżej kod programu
 void switchfiringstate(){
 	switch(firingstate){
 			case GasValvesOpen://otwarte zawory gazu
@@ -620,10 +601,8 @@ void firingswitch(){
 			firingcounter--;
 		}
 	}
-
 }
-//TODO: CHECK GAS GUN SYSTEM - FiringSwitch Works! Delay Mult Works!
-//i belive it worksss
+//todo: koniec kodu strzelania, poniżej main i główna pętla
 	enum FrameReceiveState{noInput,startReceived,processing,frameReady};
 	std::string frameMainBuffer="";
 	char readchar=0;
@@ -671,7 +650,6 @@ int main(void)
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
   //todo: main loop
-  FBpressed=1;
   while (1)
   {
 	  if (rx.written()&&__HAL_UART_GET_FLAG(&huart2, UART_FLAG_TXE) != RESET) {
@@ -682,9 +660,10 @@ int main(void)
 		  ADC_DMA_UPDATE();
 	  }
 	  if(frameMainBuffer.length()>250){
-		  //Jeżeli w buforze znajdzie się za dużo danych to czyścimy
+		  //Jeżeli w buforze znajdzie się za dużo danych to czyścimy i
 		  frameMainBuffer.clear();
 		  FrameState=noInput;
+		  respondframe("LENERR");
 	  }
 	  if(!rx.empty()){//jeżeli coś jest w buforze nie przeanalizowane
 	  readchar=rx.pop();
