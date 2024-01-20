@@ -578,7 +578,8 @@ void switchfiringstate(){
 				HAL_GPIO_WritePin(SP_GPIO_Port, SP_Pin, GPIO_PIN_RESET);
 				normaliseADCOut();
 				realshotdelay=shotdelay*timemul*POTBufNormAvg;
-				interval=realshotdelay;//powyżej zaktualizowanie i obliczenie czasu między strzałami
+				//powyżej zaktualizowanie i obliczenie czasu między strzałami
+				realshotdelay<5?interval=2.0:interval=realshotdelay;
 				if(HAL_GPIO_ReadPin(FB_GPIO_Port, FB_Pin)!=GPIO_PIN_SET){
 					FBpressed=0;
 					HAL_NVIC_EnableIRQ(EXTI9_5_IRQn);
@@ -649,7 +650,7 @@ int main(void)
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
-  //todo: main loop
+  //todo: main
   while (1)
   {
 	  if (rx.written()&&__HAL_UART_GET_FLAG(&huart2, UART_FLAG_TXE) != RESET) {
@@ -862,7 +863,7 @@ static void MX_DMA_Init(void)
 
   /* DMA interrupt init */
   /* DMA2_Stream0_IRQn interrupt configuration */
-  HAL_NVIC_SetPriority(DMA2_Stream0_IRQn, 0, 0);
+  HAL_NVIC_SetPriority(DMA2_Stream0_IRQn, 0, 1);
   HAL_NVIC_EnableIRQ(DMA2_Stream0_IRQn);
 
 }
@@ -927,10 +928,10 @@ static void MX_GPIO_Init(void)
   HAL_GPIO_Init(OV_GPIO_Port, &GPIO_InitStruct);
 
   /* EXTI interrupt init*/
-  HAL_NVIC_SetPriority(EXTI9_5_IRQn, 0, 0);
+  HAL_NVIC_SetPriority(EXTI9_5_IRQn, 0, 1);
   HAL_NVIC_EnableIRQ(EXTI9_5_IRQn);
 
-  HAL_NVIC_SetPriority(EXTI15_10_IRQn, 0, 0);
+  HAL_NVIC_SetPriority(EXTI15_10_IRQn, 0, 1);
   HAL_NVIC_EnableIRQ(EXTI15_10_IRQn);
 
 /* USER CODE BEGIN MX_GPIO_Init_2 */
