@@ -391,6 +391,8 @@ bool decodePAWNET(const std::string& message) {
     //zmienna,znajdywanie końca bo długość to długość danych po rozkodowaniu
     uint8_t endidx=message.find('|');
     if(endidx<=8){return false;}
+
+    //todo zamienić
     std::string fixedData;
     USART_send("\r\n");
     //dlugosc
@@ -409,7 +411,6 @@ bool decodePAWNET(const std::string& message) {
 
     //rekonstrukcja danych z escapeowania
     fixedData=reconstructdata(data);
-    //USART_send("\r\nDEBUG:RECONSTRUCTED DATA: "+fixedData+" \r\n");
 
     //porównywanie długości danych zrekonstruowanych z długością w ramce
     if(length!=fixedData.length()){
@@ -435,9 +436,11 @@ bool decodePAWNET(const std::string& message) {
 //--------//
 //Powyżej ramka, poniżej DMA//TODO:
 //--------//
-float POTBufferMin,POTBufferMax,POTBufNormAvg;
+uint16_t POTBufferMin=4096,POTBufferMax=0;
+float POTBufNormAvg;
 uint16_t chn1=0,chn2=0,ADC_DMA_Buffer[ADC_DMABUFFERSIZE*2]={0};
 bool convcompl=false;
+bool halfcomplete=false;
 void ADC_DMA_updateAverages() {
 	uint16_t valid_entries=0;
 	float tmpc1avg,tmpc2avg;
@@ -503,7 +506,7 @@ void ADC_DMA_UPDATE(){
 	if(convcompl){
 		if(c1avg<POTBufferMin)POTBufferMin=c1avg;
 		if(c1avg>POTBufferMax)POTBufferMax=c1avg;
-		if(POTBufferMax>4100)POTBufferMax=c1avg;
+		//if(POTBufferMax>4100)POTBufferMax=c1avg;
 		normaliseADCOut();
 		ADC_DMA_updateMeans();
 	}
@@ -517,8 +520,9 @@ void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef* hadc){
 }
 void HAL_ADC_ConvHalfCpltCallback(ADC_HandleTypeDef* hadc){
 	ReadyToUpdateAvg=true;
-	if(!convcompl)POTBufferMin=ADC_DMA_Buffer[0];//inicjalizacja min max
-	if(!convcompl)POTBufferMax=ADC_DMA_Buffer[0];
+	halfcomplete=true;
+	//if(!convcompl)POTBufferMin=ADC_DMA_Buffer[0];//inicjalizacja min max
+	//if(!convcompl)POTBufferMax=ADC_DMA_Buffer[0];
 }
 //TODO:Powyżej DMA ADC, Poniżej GPIO EXTI
 void hardcloseallvalves(){
@@ -654,18 +658,13 @@ int main(void)
   while (1)
   {
 	  if (rx.written()&&__HAL_UART_GET_FLAG(&huart2, UART_FLAG_TXE) != RESET) {
-	  	  USART_send(rx.read());
+	  	  USART_send(rx.read());//wypisywanie do konsoli
 	  	}
 
 	  if(ReadyToUpdateAvg){
 		  ADC_DMA_UPDATE();
 	  }
-	  if(frameMainBuffer.length()>250){
-		  //Jeżeli w buforze znajdzie się za dużo danych to czyścimy i
-		  frameMainBuffer.clear();
-		  FrameState=noInput;
-		  respondframe("LENERR");
-	  }
+
 	  if(!rx.empty()){//jeżeli coś jest w buforze nie przeanalizowane
 	  readchar=rx.pop();
 	  if(readchar=='^'){//jeżeli znak start
@@ -680,25 +679,24 @@ int main(void)
 	  			  frameMainBuffer.push_back(readchar);
 	  			  FrameState=frameReady;//ustaw flagę końca.
 	  		  }
+	  		if(frameMainBuffer.length()>210){
+	  				  //Jeżeli w buforze znajdzie się za dużo danych to czyścimy i
+	  				  frameMainBuffer.clear();
+	  				  FrameState=noInput;
+	  				  respondframe("LENERR");
+	  			  }
 	  	  }
 	  }
 
 	  if(FrameState==frameReady)
 	   {
-		    //USART_send("\r\n END CHAR FOUND\r\n");
-	        //std::string msg = rx.popUntilIncl('|');
 	        //przycinanie ramki
-		  	//trimStartEndCharacters(msg, '^', '|');
-		      trimStartEndCharacters(frameMainBuffer, '^', '|');
+		      //trimStartEndCharacters(frameMainBuffer, '^', '|');
 	        //rozkoduj ramkę
-	        //if(decodePAWNET(msg)){
-
 		  	  if(decodePAWNET(frameMainBuffer)){
 	        	//na wypadek poprawnego rozkodowania
-	        	//USART_send("\r\nDEBUG:MESSAGE DECODE SUCCESS\r\n");
 	        }else{
 	        	//jeżeli gdziekolwiek podczas rozkodowania wystąpi błąd
-	        	//USART_send("\r\nDEBUG:MESSAGE DECODE FAIL\r\n");
 	        }
 	        FrameState=noInput;
 	  }

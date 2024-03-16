@@ -4047,7 +4047,8 @@ void switchfiringstate(){
  800281a:	ee67 7a27 	vmul.f32	s15, s14, s15
  800281e:	4b25      	ldr	r3, [pc, #148]	; (80028b4 <_Z17switchfiringstatev+0x168>)
  8002820:	edc3 7a00 	vstr	s15, [r3]
-				realshotdelay<5?interval=2.0:interval=realshotdelay;//powyżej zaktualizowanie i obliczenie czasu między strzałami
+				//powyżej zaktualizowanie i obliczenie czasu między strzałami
+				realshotdelay<5?interval=2.0:interval=realshotdelay;
  8002824:	4b23      	ldr	r3, [pc, #140]	; (80028b4 <_Z17switchfiringstatev+0x168>)
  8002826:	edd3 7a00 	vldr	s15, [r3]
  800282a:	eeb1 7a04 	vmov.f32	s14, #20	; 0x40a00000  5.0
@@ -4230,7 +4231,7 @@ int main(void)
  8002976:	f004 fc2b 	bl	80071d0 <_ZNSaIcED1Ev>
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
-  //todo: main loop
+  //todo: main
   while (1)
   {
 	  if (rx.written()&&__HAL_UART_GET_FLAG(&huart2, UART_FLAG_TXE) != RESET) {
@@ -4832,8 +4833,8 @@ static void MX_DMA_Init(void)
 
   /* DMA interrupt init */
   /* DMA2_Stream0_IRQn interrupt configuration */
-  HAL_NVIC_SetPriority(DMA2_Stream0_IRQn, 0, 0);
- 8002d3a:	2200      	movs	r2, #0
+  HAL_NVIC_SetPriority(DMA2_Stream0_IRQn, 0, 1);
+ 8002d3a:	2201      	movs	r2, #1
  8002d3c:	2100      	movs	r1, #0
  8002d3e:	2038      	movs	r0, #56	; 0x38
  8002d40:	f001 fe85 	bl	8004a4e <HAL_NVIC_SetPriority>
@@ -5035,8 +5036,8 @@ static void MX_GPIO_Init(void)
  8002e84:	f002 fa2a 	bl	80052dc <HAL_GPIO_Init>
 
   /* EXTI interrupt init*/
-  HAL_NVIC_SetPriority(EXTI9_5_IRQn, 0, 0);
- 8002e88:	2200      	movs	r2, #0
+  HAL_NVIC_SetPriority(EXTI9_5_IRQn, 0, 1);
+ 8002e88:	2201      	movs	r2, #1
  8002e8a:	2100      	movs	r1, #0
  8002e8c:	2017      	movs	r0, #23
  8002e8e:	f001 fdde 	bl	8004a4e <HAL_NVIC_SetPriority>
@@ -5044,8 +5045,8 @@ static void MX_GPIO_Init(void)
  8002e92:	2017      	movs	r0, #23
  8002e94:	f001 fdf7 	bl	8004a86 <HAL_NVIC_EnableIRQ>
 
-  HAL_NVIC_SetPriority(EXTI15_10_IRQn, 0, 0);
- 8002e98:	2200      	movs	r2, #0
+  HAL_NVIC_SetPriority(EXTI15_10_IRQn, 0, 1);
+ 8002e98:	2201      	movs	r2, #1
  8002e9a:	2100      	movs	r1, #0
  8002e9c:	2028      	movs	r0, #40	; 0x28
  8002e9e:	f001 fdd6 	bl	8004a4e <HAL_NVIC_SetPriority>
@@ -6665,8 +6666,8 @@ void HAL_ADC_MspInit(ADC_HandleTypeDef* hadc)
  8003980:	6393      	str	r3, [r2, #56]	; 0x38
 
     /* ADC1 interrupt Init */
-    HAL_NVIC_SetPriority(ADC_IRQn, 0, 0);
- 8003982:	2200      	movs	r2, #0
+    HAL_NVIC_SetPriority(ADC_IRQn, 0, 1);
+ 8003982:	2201      	movs	r2, #1
  8003984:	2100      	movs	r1, #0
  8003986:	2012      	movs	r0, #18
  8003988:	f001 f861 	bl	8004a4e <HAL_NVIC_SetPriority>
@@ -6773,8 +6774,8 @@ void HAL_UART_MspInit(UART_HandleTypeDef* huart)
  8003a26:	f001 fc59 	bl	80052dc <HAL_GPIO_Init>
 
     /* USART2 interrupt Init */
-    HAL_NVIC_SetPriority(USART2_IRQn, 0, 0);
- 8003a2a:	2200      	movs	r2, #0
+    HAL_NVIC_SetPriority(USART2_IRQn, 0, 1);
+ 8003a2a:	2201      	movs	r2, #1
  8003a2c:	2100      	movs	r1, #0
  8003a2e:	2026      	movs	r0, #38	; 0x26
  8003a30:	f001 f80d 	bl	8004a4e <HAL_NVIC_SetPriority>
